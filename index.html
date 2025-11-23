@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Panduan Deposit OPALP</title>
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#000000">
+
+    <style>
+        /* --- RESET DASAR --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
+        body {
+            background-color: #000;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            position: fixed; /* Kunci layar agar tidak goyang */
+        }
+
+        /* --- CONTAINER UTAMA (FULL LAYAR) --- */
+        #stage {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* --- GAMBAR PRESISI --- */
+        #mainImage {
+            width: 100%;
+            height: 100%;
+            object-fit: contain; /* Gambar pas di layar tanpa terpotong */
+            display: block;
+            opacity: 0;
+            transition: opacity 0.2s ease-out;
+        }
+
+        #mainImage.show { opacity: 1; }
+
+        /* --- HEADER MENGAMBANG (FLOATING) --- */
+        header {
+            position: absolute;
+            top: 0; left: 0; width: 100%;
+            height: 80px; /* Area gradasi */
+            /* Gradasi Hitam ke Transparan (Agar teks terbaca tapi gambar tetap terlihat di belakangnya) */
+            background: linear-gradient(to bottom, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0) 100%);
+            z-index: 10; /* Di atas gambar */
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start; /* Tempel ke atas */
+            padding: 20px;
+            pointer-events: none; /* Agar klik tembus ke gambar */
+        }
+
+        .title {
+            color: white;
+            font-weight: 600;
+            font-size: 16px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+            letter-spacing: 0.5px;
+        }
+
+        .counter {
+            color: #d4af37; /* Emas */
+            font-weight: 700;
+            font-size: 16px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+        }
+
+        /* --- AREA KLIK (INVISIBLE) --- */
+        .click-layer {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 5;
+            display: flex;
+        }
+        .zone {
+            height: 100%;
+            width: 50%;
+            /* border: 1px solid red; Gunakan ini utk debug area klik */
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="stage">
+        <img id="mainImage" src="" alt="Panduan">
+    </div>
+
+    <header>
+        <div class="title">Panduan Deposit</div>
+        <div class="counter" id="counter">1 / 26</div>
+    </header>
+
+    <div class="click-layer">
+        <div class="zone" onclick="prevSlide()"></div> <div class="zone" onclick="nextSlide()"></div> </div>
+
+<script>
+    // --- KONFIGURASI ---
+    const totalImages = 26;
+    let currentIndex = 1;
+
+    const imgEl = document.getElementById('mainImage');
+    const countEl = document.getElementById('counter');
+
+    // --- FUNGSI UTAMA ---
+    function showImage() {
+        // Matikan opacity sebentar utk efek transisi
+        imgEl.classList.remove('show');
+
+        // Ganti source gambar
+        // Menggunakan setTimeout 0 agar browser merender ulang class remove
+        setTimeout(() => {
+            imgEl.src = `${currentIndex}.png`;
+            countEl.innerText = `${currentIndex} / ${totalImages}`;
+            
+            // Preload gambar berikutnya
+            if(currentIndex < totalImages) {
+                const next = new Image();
+                next.src = `${currentIndex + 1}.png`;
+            }
+        }, 10);
+    }
+
+    // Saat gambar selesai di-load, baru munculkan (Fade In)
+    imgEl.onload = () => {
+        imgEl.classList.add('show');
+    };
+
+    // --- NAVIGASI ---
+    function nextSlide() {
+        if (currentIndex < totalImages) {
+            currentIndex++;
+            showImage();
+        } else {
+            // Efek mentok (Opsional: Getar di HP)
+            if (navigator.vibrate) navigator.vibrate(50);
+        }
+    }
+
+    function prevSlide() {
+        if (currentIndex > 1) {
+            currentIndex--;
+            showImage();
+        }
+    }
+
+    // Keyboard Support
+    document.addEventListener('keydown', (e) => {
+        if (e.key === "ArrowRight") nextSlide();
+        if (e.key === "ArrowLeft") prevSlide();
+    });
+
+    // Start
+    showImage();
+
+</script>
+
+</body>
+</html>
