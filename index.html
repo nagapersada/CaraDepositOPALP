@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Training Tim DVNP</title>
+    <style>
+        /* --- RESET & MOBILE OPTIMIZATION --- */
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent; /* Hapus kotak biru saat tap di Android */
+            outline: none;
+        }
+        
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f0f2f5;
+            color: #333;
+            /* Mencegah scroll pada body utama (bouncing effect di iOS) */
+            position: fixed; 
+            width: 100%; 
+            height: 100%;
+            overflow: hidden;
+        }
+
+        /* --- SCREEN CONTAINER --- */
+        .screen {
+            display: none;
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            width: 100%;
+            height: 100%;
+            flex-direction: column;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch; /* Smooth scroll untuk iOS */
+            background: white;
+            z-index: 10;
+            
+            /* PENTING: Padding agar tidak tertutup poni iPhone & Navigasi Bawah */
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        .screen.active {
+            display: flex;
+            animation: fadeIn 0.25s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.98); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* --- CONTENT WRAPPER --- */
+        /* Bungkus konten agar bisa di-scroll tanpa tertutup guide overlay */
+        .content-scroll {
+            padding: 20px;
+            padding-bottom: 120px; /* Ruang ekstra di bawah untuk tombol & guide */
+            flex: 1;
+        }
+
+        /* --- GUIDE OVERLAY (FIXED BOTTOM) --- */
+        .guide-overlay {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            background: #fff3cd;
+            color: #856404;
+            padding: 15px;
+            padding-bottom: calc(15px + env(safe-area-inset-bottom)); /* Adaptasi iPhone X+ */
+            font-size: 13px;
+            text-align: center;
+            border-top: 2px solid #ffeeba;
+            font-weight: bold;
+            z-index: 999;
+            box-shadow: 0 -4px 15px rgba(0,0,0,0.1);
+            backdrop-filter: blur(5px);
+        }
+
+        /* --- ELEMENT STYLES --- */
+        .op-header { 
+            padding: 15px 20px; 
+            display: flex; 
+            align-items: center; 
+            font-weight: bold; 
+            font-size: 18px; 
+            border-bottom: 1px solid #eee;
+            background: white;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .op-input {
+            width: 100%; 
+            margin-bottom: 15px;
+            padding: 15px; 
+            border: 1px solid #ddd; 
+            border-radius: 12px; 
+            font-size: 16px; /* 16px MENCEGAH ZOOM OTOMATIS DI IPHONE */
+            background: #f9f9f9;
+            appearance: none; /* Reset style native iOS */
+        }
+
+        .op-btn {
+            width: 100%; 
+            padding: 16px; 
+            background: #5d6ecb; 
+            color: white;
+            border: none; 
+            border-radius: 12px; 
+            font-weight: bold; 
+            font-size: 16px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(93, 110, 203, 0.3);
+            margin-top: 20px;
+        }
+        
+        .op-btn:active {
+            opacity: 0.8;
+            transform: scale(0.98);
+        }
+
+        /* --- MODAL JEBAKAN --- */
+        .op-modal-bg {
+            position: fixed; top:0; left:0; width:100%; height:100%;
+            background: rgba(0,0,0,0.6); 
+            display: flex; justify-content: center; align-items: center;
+            z-index: 100;
+            backdrop-filter: blur(3px);
+        }
+        .op-modal {
+            background: white; width: 85%; padding: 25px; 
+            border-radius: 20px; text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        /* --- INDODAX THEME --- */
+        .theme-indodax { background-color: #12161c; color: #eaecef; }
+        .theme-indodax .op-header { background: #1e2329; color: white; border-bottom: 1px solid #2b3139; }
+        .idx-card { background: #1e2329; padding: 20px; border-radius: 12px; margin-bottom: 20px; }
+        .idx-input {
+            background: #2b3139; border: 1px solid #474d57; color: white;
+            padding: 14px; width: 100%; border-radius: 8px; margin-bottom: 15px; font-size: 16px;
+        }
+        .idx-btn {
+            background: #0ecb81; color: white; border: none;
+            padding: 16px; border-radius: 8px; width: 100%; font-weight: bold; font-size: 16px; margin-top: 10px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="scr-intro" class="screen active" style="justify-content:center; align-items:center;">
+        <div style="text-align:center; padding: 20px;">
+            <div style="width:80px; height:80px; background:#5d6ecb; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 20px auto; font-size:40px;">🛡️</div>
+            <h2>Training Tim DVNP</h2>
+            <p style="color:#666;">Simulasi Aman Registrasi & Deposit</p>
+            <p style="font-size:12px; color:#999;">Support: Android & iOS</p>
+        </div>
+        <div style="position:absolute; bottom:50px; width:100%; padding:20px;">
+            <button class="op-btn" onclick="goto('scr-op-1')">Mulai Simulasi ➡</button>
+        </div>
+    </div>
+
+    <div id="scr-op-1" class="screen">
+        <div class="op-header">Negara / Wilayah</div>
+        <div class="content-scroll">
+            <div style="background:white; border-radius:12px; overflow:hidden; border:1px solid #eee;">
+                <div style="padding:20px; border-bottom:1px solid #eee;" onclick="alert('Salah! Pilih Indonesia.')">HongKong (+852)</div>
+                <div style="padding:20px; border-bottom:1px solid #eee;" onclick="alert('Salah! Pilih Indonesia.')">India (+91)</div>
+                <div style="padding:20px; border-bottom:1px solid #eee; background:#f0f8ff; color:#5d6ecb; font-weight:bold;" onclick="goto('scr-op-2')">Indonesia (+62)</div>
+                <div style="padding:20px;" onclick="alert('Salah! Pilih Indonesia.')">Malaysia (+60)</div>
+            </div>
+        </div>
+        <div class="guide-overlay">👇 Pilih <b>Indonesia (+62)</b> (Lihat PDF Hal 2)</div>
+    </div>
+
+    <div id="scr-op-2" class="screen">
+        <div class="op-header">Daftar Akun</div>
+        <div class="content-scroll">
+            <h3 style="margin-top:0;">Selamat Datang</h3>
+            <p style="font-size:13px; color:#666; margin-bottom:20px;">Masukkan data sesuai panduan.</p>
+            
+            <input class="op-input" type="email" placeholder="Email (contoh@gmail.com)" value="anggota@gmail.com">
+            <input class="op-input" type="password" placeholder="Password Login (8+ kar)">
+            <input class="op-input" type="text" placeholder="Kode Rujukan (DVNP2025)" value="DVNP2025">
+            
+            <button class="op-btn" onclick="goto('scr-op-3')">Buat Akun</button>
+        </div>
+        <div class="guide-overlay">📝 Isi Email & Password Login</div>
+    </div>
+
+    <div id="scr-op-3" class="screen">
+        <div class="op-header">Beranda</div>
+        <div class="op-modal-bg">
+            <div class="op-modal">
+                <h3 style="margin-top:0;">Berhasil Dibatasi</h3>
+                <p style="font-size:14px; color:#666; line-height:1.5;">Anda telah menyelesaikan pendaftaran. Mengikat nomor telepon akan meningkatkan keamanan.</p>
+                <div style="display:flex; gap:10px; margin-top:25px;">
+                    <button style="flex:1; padding:12px; border:1px solid #ccc; background:white; border-radius:8px; font-weight:bold; font-size:14px;" onclick="goto('scr-op-4')">Lewati</button>
+                    <button style="flex:1; padding:12px; background:#5d6ecb; color:white; border:none; border-radius:8px; font-weight:bold; font-size:14px;" onclick="alert('❌ SALAH! PDF Hal 5 Instruksi: KLIK LEWATI. Jangan klik Bind Now.')">Bind Now</button>
+                </div>
+            </div>
+        </div>
+        <div class="guide-overlay">⚠ HATI-HATI: Pilih tombol yang BENAR (PDF Hal 5)</div>
+    </div>
+
+    <div id="scr-op-4" class="screen">
+        <div class="op-header">
+            <span>Opalp</span>
+            <span style="margin-left:auto;">🔔</span>
+        </div>
+        
+        <div class="content-scroll">
+            <div style="background:#ffebee; padding:15px; border-radius:12px; border:1px solid #ffcdd2; margin-top:10px;">
+                <strong style="color:#d32f2f;">BUAT PASSWORD PENARIKAN</strong>
+                <p style="font-size:13px; margin:8px 0 15px 0; color:#555;">Sangat penting untuk keamanan aset.</p>
+                <button style="background:#d32f2f; color:white; border:none; padding:10px 25px; border-radius:20px; font-weight:bold;" onclick="goto('scr-op-5')">Atur Sekarang</button>
+            </div>
+        </div>
+        
+        <div class="guide-overlay">👇 Klik <b>"Atur Sekarang"</b> (Wajib sebelum Deposit)</div>
+    </div>
+
+    <div id="scr-op-5" class="screen">
+        <div class="op-header">Sandi Dana</div>
+        <div class="content-scroll">
+            <p style="font-size:14px; color:#666; margin-bottom:20px;">Buat 6 angka sandi. <br><b>PENTING:</b> Harus BEDA dengan Password Login.</p>
+            <input class="op-input" type="number" placeholder="Sandi Baru (6 Angka)">
+            <input class="op-input" type="number" placeholder="Konfirmasi Sandi">
+            <button class="op-btn" onclick="goto('scr-op-6')">Konfirmasi</button>
+        </div>
+        <div class="guide-overlay">🔑 Buat PIN Transaksi (Beda dgn Login)</div>
+    </div>
+
+    <div id="scr-op-6" class="screen" style="justify-content:center; text-align:center; background:#f8f9fa;">
+        <div style="padding:30px;">
+            <h2 style="color:#5d6ecb;">Registrasi Selesai!</h2>
+            <div style="background:white; padding:15px; border-radius:10px; margin:20px 0; box-shadow:0 2px 10px rgba(0,0,0,0.05);">
+                <p style="margin:5px 0; font-size:14px;">Status Akun: <b>Aktif</b></p>
+                <p style="margin:5px 0; font-size:14px;">UID: <b>815689</b></p>
+            </div>
+            <p>Selanjutnya: Latihan Deposit di Indodax.</p>
+        </div>
+        <div style="position:absolute; bottom:50px; width:100%; padding:20px;">
+            <button class="op-btn" style="background:#12161c;" onclick="goto('scr-idx-1')">Buka Indodax ➡</button>
+        </div>
+    </div>
+
+    <div id="scr-idx-1" class="screen theme-indodax">
+        <div class="op-header">
+            <span>INDODAX PRO</span>
+        </div>
+        <div class="content-scroll">
+            <div class="idx-card">
+                <small style="color:#aaa;">Total Aset IDR</small>
+                <h2 id="saldo-idx" style="margin:5px 0; font-size:28px;">0</h2>
+            </div>
+            
+            <div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:10px;">
+                <div style="text-align:center;" onclick="goto('scr-idx-2')">
+                    <div style="background:#2b3139; width:55px; height:55px; border-radius:50%; margin:auto; display:flex; align-items:center; justify-content:center; font-size:24px;">⬇</div>
+                    <small style="display:block; margin-top:8px; color:#aaa;">Setor</small>
+                </div>
+                <div style="text-align:center; opacity:0.5;">
+                    <div style="background:#2b3139; width:55px; height:55px; border-radius:50%; margin:auto;"></div>
+                </div>
+                <div style="text-align:center; opacity:0.5;">
+                    <div style="background:#2b3139; width:55px; height:55px; border-radius:50%; margin:auto;"></div>
+                </div>
+                <div style="text-align:center; opacity:0.5;">
+                    <div style="background:#2b3139; width:55px; height:55px; border-radius:50%; margin:auto;"></div>
+                </div>
+            </div>
+        </div>
+        <div class="guide-overlay" style="background:#222; color:#ffd700; border-top:1px solid #444;">👇 Klik Menu <b>Setor</b></div>
+    </div>
+
+    <div id="scr-idx-2" class="screen theme-indodax">
+        <div class="op-header">Setor Rupiah</div>
+        <div class="content-scroll">
+            <label style="color:#aaa; font-size:13px;">Jumlah Deposit</label>
+            <input class="idx-input" type="number" value="1700000" id="input-depo">
+            
+            <label style="color:#aaa; font-size:13px; margin-top:15px; display:block;">Metode Pembayaran</label>
+            <div style="background:#2b3139; padding:15px; border-radius:8px; color:white; border:1px solid #474d57;">
+                Virtual Account (BCA)
+            </div>
+            
+            <button class="idx-btn" onclick="goto('scr-idx-3')">Lanjut</button>
+        </div>
+    </div>
+
+    <div id="scr-idx-3" class="screen theme-indodax">
+        <div class="op-header">Pembayaran</div>
+        <div class="content-scroll">
+            <div class="idx-card" style="text-align:center;">
+                <p style="color:#aaa;">BCA Virtual Account</p>
+                <h2 style="color:#0ecb81; font-size:28px; margin:15px 0;">3353 7888 99</h2>
+                <div style="background:#2b3139; padding:10px; border-radius:5px; display:inline-block; font-size:12px;">Salin Nomor</div>
+                <p style="margin-top:20px;">Total: Rp 1.700.049</p>
+            </div>
+            <button class="idx-btn" onclick="simulasiTransfer()">Simulasi: Saya Sudah Transfer</button>
+        </div>
+        <div class="guide-overlay" style="background:#222; color:#ffd700; border-top:1px solid #444;">💳 Ceritanya Anda transfer via M-Banking</div>
+    </div>
+
+    <div id="scr-idx-4" class="screen theme-indodax">
+        <div class="op-header">
+            <span>USDT/IDR</span>
+            <span style="color:#0ecb81">+0.23%</span>
+        </div>
+        
+        <div class="content-scroll">
+            <div style="display:flex; margin-bottom:20px;">
+                <div style="flex:1; background:#0ecb81; padding:12px; text-align:center; border-radius:4px; font-weight:bold;">Beli</div>
+                <div style="flex:1; background:#2b3139; padding:12px; text-align:center; border-radius:4px; margin-left:5px; color:#aaa;">Jual</div>
+            </div>
+
+            <label style="color:#aaa; font-size:12px;">Tipe Order (Wajib Ganti)</label>
+            <select id="order-type" class="idx-input" style="height:50px; margin-bottom:20px; border:1px solid #ffd700; color:white;">
+                <option value="limit">Limit Order</option>
+                <option value="market">Market Order (Instan)</option>
+            </select>
+
+            <label style="color:#aaa; font-size:12px;">Jumlah IDR</label>
+            <div style="display:flex; gap:10px; margin-bottom:20px;">
+                <input id="input-beli" class="idx-input" type="text" placeholder="Rp 0" readonly style="flex:2; margin:0;">
+                <button style="flex:1; background:#444; color:white; border:none; border-radius:4px;" onclick="document.getElementById('input-beli').value='1700000'">100%</button>
+            </div>
+            
+            <button class="idx-btn" onclick="cekMarketOrder()">Beli USDT</button>
+        </div>
+        <div class="guide-overlay" style="background:#222; color:#ffd700; border-top:1px solid #444;">⚠ Ubah Limit ➡ <b>Market Order</b> agar sukses!</div>
+    </div>
+
+    <div id="scr-idx-5" class="screen theme-indodax">
+        <div class="op-header">Dompet USDT</div>
+        <div class="content-scroll">
+            <div class="idx-card">
+                <p style="color:#aaa;">Saldo Tersedia</p>
+                <h2 style="font-size:32px;">103.30 USDT</h2>
+            </div>
+            <button class="idx-btn" style="background:#f6465d;" onclick="goto('scr-idx-6')">Tarik Koin (Kirim)</button>
+        </div>
+    </div>
+
+    <div id="scr-idx-6" class="screen theme-indodax">
+        <div class="op-header">Tarik USDT</div>
+        
+        <div class="content-scroll">
+            <label style="color:#fff; font-weight:bold;">Pilih Jaringan (KRUSIAL)</label>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:15px 0;">
+                <div onclick="alert('❌ SALAH! Aset akan hilang jika pakai BEP20.')" style="padding:15px; border:1px solid #555; border-radius:8px; text-align:center; font-size:14px;">BEP20</div>
+                <div id="btn-trc" onclick="pilihTRC()" style="padding:15px; border:1px solid #555; border-radius:8px; text-align:center; font-size:14px;">TRC20</div>
+                <div onclick="alert('❌ SALAH! Jangan pilih ERC20.')" style="padding:15px; border:1px solid #555; border-radius:8px; text-align:center; font-size:14px;">ERC20</div>
+                <div onclick="alert('❌ SALAH!')" style="padding:15px; border:1px solid #555; border-radius:8px; text-align:center; font-size:14px;">Polygon</div>
+            </div>
+
+            <label style="color:#aaa; font-size:12px;">Alamat Penerima</label>
+            <input class="idx-input" value="TCHutm2VJ1dqqMtsK65couECVG4u1BfmLT" readonly style="font-size:12px;">
+            
+            <label style="color:#aaa; font-size:12px; margin-top:10px; display:block;">Jumlah</label>
+            <input class="idx-input" value="103.30" readonly>
+            
+            <button class="idx-btn" onclick="cekWithdraw()">Lanjut Verifikasi</button>
+        </div>
+        <div class="guide-overlay" style="background:#d32f2f; color:white;">⚠ WAJIB PILIH <b>TRC20</b> (Lihat PDF Hal 19)</div>
+    </div>
+
+    <div id="scr-finish" class="screen theme-indodax" style="justify-content:center; align-items:center;">
+        <div style="text-align:center; padding:20px;">
+            <div style="font-size:70px; margin-bottom:20px;">✅</div>
+            <h2>Training Selesai!</h2>
+            <p style="color:#aaa;">Anda telah berhasil mensimulasikan<br>Pendaftaran & Deposit.</p>
+            <button class="idx-btn" style="width:100%; margin-top:30px; background:#2b3139;" onclick="location.reload()">Ulangi Training ↺</button>
+        </div>
+    </div>
+
+    <script>
+        // --- LOGIC APLIKASI ---
+
+        function goto(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            const target = document.getElementById(screenId);
+            if(target) {
+                target.classList.add('active');
+                target.scrollTop = 0; 
+            }
+        }
+
+        // Logic Simulasi Transfer
+        function simulasiTransfer() {
+            const btn = document.querySelector('#scr-idx-3 .idx-btn');
+            const originalText = btn.innerText;
+            btn.innerText = "Mengecek Mutasi...";
+            btn.style.opacity = "0.7";
+            
+            setTimeout(() => {
+                document.getElementById('saldo-idx').innerText = "1.700.049";
+                alert("✅ Deposit Rp 1.700.000 Masuk!");
+                goto('scr-idx-4');
+                btn.innerText = originalText;
+                btn.style.opacity = "1";
+            }, 1000);
+        }
+
+        // Logic Market Order
+        function cekMarketOrder() {
+            const type = document.getElementById('order-type').value;
+            const amount = document.getElementById('input-beli').value;
+
+            if (type !== 'market') {
+                alert("⚠️ PERHATIAN! Ubah dulu 'Limit Order' menjadi 'Market Order' agar pembelian langsung sukses.");
+                return;
+            }
+            if (amount === "") {
+                alert("Klik tombol 100% dulu.");
+                return;
+            }
+            goto('scr-idx-5');
+        }
+
+        // Logic TRC20
+        let trcSelected = false;
+        function pilihTRC() {
+            trcSelected = true;
+            const btn = document.getElementById('btn-trc');
+            btn.style.borderColor = "#0ecb81";
+            btn.style.backgroundColor = "rgba(14, 203, 129, 0.2)";
+            btn.style.color = "#0ecb81";
+            btn.style.fontWeight = "bold";
+        }
+
+        function cekWithdraw() {
+            if (!trcSelected) {
+                alert("⛔ BAHAYA! Anda belum memilih jaringan TRC20. Aset bisa hilang selamanya.");
+                return;
+            }
+            goto('scr-finish');
+        }
+    </script>
+</body>
+</html>
