@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Panduan Deposit OPALP</title>
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#000000">
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
+    <style>
+        /* --- RESET --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
+        body {
+            background-color: #000; /* Latar Hitam Elegan */
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- HEADER (Fixed Top) --- */
+        .app-header {
+            position: absolute;
+            top: 0; left: 0; width: 100%;
+            height: 60px; /* Tinggi Header Tetap */
+            background: rgba(0, 0, 0, 0.85); /* Semi transparan */
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            z-index: 50;
+            color: white;
+        }
+
+        .header-title {
+            font-weight: 600;
+            font-size: 1rem;
+            letter-spacing: 0.5px;
+            color: #ffffff;
+        }
+
+        .header-counter {
+            background: rgba(255, 255, 255, 0.15);
+            color: #d4af37; /* Warna Emas */
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        /* --- VIEWER AREA --- */
+        #viewer-stage {
+            width: 100%;
+            height: 100%;
+            padding-top: 60px; /* PENTING: Memberi jarak agar gambar tidak ketutup header */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        /* --- GAMBAR UTAMA --- */
+        #mainImage {
+            max-width: 100%;
+            max-height: 100%; 
+            width: auto;
+            height: auto;
+            object-fit: contain; /* Gambar utuh presisi di tengah */
+            opacity: 0;
+            transition: opacity 0.25s ease;
+        }
+
+        #mainImage.show {
+            opacity: 1;
+        }
+
+        /* --- NAVIGATION ZONES (Invisible) --- */
+        .tap-zone {
+            position: absolute;
+            top: 60px; /* Mulai dari bawah header */
+            bottom: 0;
+            width: 50%;
+            z-index: 20;
+            cursor: pointer;
+            /* background: rgba(255,0,0,0.1); Hapus komentar ini jika ingin melihat area klik */
+        }
+        .left-zone { left: 0; }
+        .right-zone { right: 0; }
+
+    </style>
+</head>
+<body>
+
+    <header class="app-header">
+        <div class="header-title">Panduan Deposit</div>
+        <div class="header-counter" id="counter">1 / 26</div>
+    </header>
+
+    <div id="viewer-stage">
+        <div class="tap-zone left-zone" onclick="prevSlide()"></div>
+        
+        <div class="tap-zone right-zone" onclick="nextSlide()"></div>
+
+        <img id="mainImage" src="" alt="Guide Image">
+    </div>
+
+<script>
+    // --- KONFIGURASI ---
+    const totalImages = 26;
+    let currentIndex = 1;
+
+    // --- ELEMENT ---
+    const imgElement = document.getElementById('mainImage');
+    const counterElement = document.getElementById('counter');
+
+    // --- FUNGSI UPDATE ---
+    function updateView() {
+        // Efek kedip halus
+        imgElement.classList.remove('show');
+
+        setTimeout(() => {
+            imgElement.src = `${currentIndex}.png`;
+            
+            // Update Text Header
+            counterElement.textContent = `${currentIndex} / ${totalImages}`;
+
+            // Tampilkan Gambar
+            imgElement.onload = () => {
+                imgElement.classList.add('show');
+            };
+            // Fallback cache
+            if (imgElement.complete) imgElement.classList.add('show');
+
+            // Preload gambar berikutnya (biar cepat)
+            if (currentIndex < totalImages) {
+                const nextImg = new Image();
+                nextImg.src = `${currentIndex + 1}.png`;
+            }
+
+        }, 80); // Delay dikit biar transisi terasa
+    }
+
+    // --- NAVIGASI ---
+    function nextSlide() {
+        if (currentIndex < totalImages) {
+            currentIndex++;
+            updateView();
+        } else {
+            // Indikasi mentok (opsional: counter berkedip)
+            counterElement.style.color = 'red';
+            setTimeout(() => counterElement.style.color = '#d4af37', 300);
+        }
+    }
+
+    function prevSlide() {
+        if (currentIndex > 1) {
+            currentIndex--;
+            updateView();
+        }
+    }
+
+    // --- KEYBOARD & SWIPE ---
+    document.addEventListener('keydown', (e) => {
+        if (e.key === "ArrowRight" || e.key === "Space") nextSlide();
+        if (e.key === "ArrowLeft") prevSlide();
+    });
+
+    // Start
+    updateView();
+
+</script>
+
+</body>
+</html>
