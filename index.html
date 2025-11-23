@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Panduan Deposit</title>
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#000000">
+
+    <style>
+        /* --- RESET PREMI --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
+        body {
+            background-color: #000;
+            /* Menggunakan dvh (Dynamic Viewport Height) untuk presisi HP modern */
+            height: 100dvh; 
+            width: 100vw;
+            overflow: hidden;
+            font-family: sans-serif;
+            position: fixed; /* Kunci Body */
+            top: 0; left: 0;
+        }
+
+        /* --- LAYOUT UTAMA --- */
+        #app-container {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1;
+        }
+
+        /* --- GAMBAR PRESISI (FULL) --- */
+        #mainImage {
+            width: 100%;
+            height: 100%;
+            /* object-fit: contain = Gambar utuh 
+               object-position: center = Pas di tengah */
+            object-fit: contain; 
+            object-position: center;
+            display: block;
+        }
+
+        /* --- HEADER TRANSPARAN --- */
+        .header-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%;
+            padding: 20px; /* Jarak aman dari atas */
+            padding-top: max(20px, env(safe-area-inset-top)); /* Support Poni HP */
+            display: flex;
+            justify-content: space-between;
+            z-index: 10;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
+            pointer-events: none; /* Klik tembus ke bawah */
+        }
+
+        .title { color: white; font-weight: 600; font-size: 14px; opacity: 0.8; }
+        .counter { color: #d4af37; font-weight: 700; font-size: 14px; }
+
+        /* --- TOMBOL FULLSCREEN (WAJIB ADA) --- */
+        /* Browser melarang fullscreen otomatis, user harus klik dulu */
+        #start-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-align: center;
+        }
+
+        .btn-start {
+            margin-top: 20px;
+            padding: 12px 30px;
+            background: #d4af37;
+            color: #000;
+            border: none;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
+        }
+
+        /* --- AREA KLIK NAVIGASI --- */
+        .nav-layer {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 5;
+            display: flex;
+        }
+        .nav-zone { width: 50%; height: 100%; }
+
+    </style>
+</head>
+<body>
+
+    <div id="start-overlay">
+        <h2 style="margin-bottom: 10px;">Panduan Deposit</h2>
+        <p style="opacity: 0.7; font-size: 14px;">Klik tombol di bawah untuk tampilan penuh</p>
+        <button class="btn-start" onclick="enterApp()">MULAI FULLSCREEN</button>
+    </div>
+
+    <div class="header-overlay">
+        <div class="title">Panduan Deposit</div>
+        <div class="counter" id="counter">1 / 26</div>
+    </div>
+
+    <div id="app-container">
+        <img id="mainImage" src="" alt="Slide">
+    </div>
+
+    <div class="nav-layer">
+        <div class="nav-zone" onclick="prevSlide()"></div> <div class="nav-zone" onclick="nextSlide()"></div> </div>
+
+<script>
+    const totalImages = 26;
+    let currentIndex = 1;
+    const imgEl = document.getElementById('mainImage');
+    const countEl = document.getElementById('counter');
+    const startOverlay = document.getElementById('start-overlay');
+
+    // --- 1. LOGIC FULLSCREEN ---
+    function enterApp() {
+        // Minta Fullscreen ke Browser
+        const elem = document.documentElement;
+        if (elem.requestFullscreen) {
+            elem.requestFullscreen().catch(err => console.log(err));
+        } else if (elem.webkitRequestFullscreen) { /* Safari */
+            elem.webkitRequestFullscreen();
+        } else if (elem.msRequestFullscreen) { /* IE11 */
+            elem.msRequestFullscreen();
+        }
+
+        // Hilangkan overlay tombol start
+        startOverlay.style.opacity = '0';
+        setTimeout(() => startOverlay.style.display = 'none', 500);
+
+        // Load gambar pertama
+        updateImage();
+    }
+
+    // --- 2. UPDATE GAMBAR ---
+    function updateImage() {
+        imgEl.style.opacity = '0.5'; // Efek kedip dikit
+        
+        setTimeout(() => {
+            imgEl.src = `${currentIndex}.png`;
+            countEl.innerText = `${currentIndex} / ${totalImages}`;
+            imgEl.onload = () => imgEl.style.opacity = '1';
+        }, 50);
+
+        // Preload next
+        if(currentIndex < totalImages) {
+            const next = new Image(); next.src = `${currentIndex + 1}.png`;
+        }
+    }
+
+    // --- 3. NAVIGASI ---
+    function nextSlide() {
+        if (currentIndex < totalImages) {
+            currentIndex++;
+            updateImage();
+        }
+    }
+
+    function prevSlide() {
+        if (currentIndex > 1) {
+            currentIndex--;
+            updateImage();
+        }
+    }
+
+    // Load awal (di background)
+    imgEl.src = "1.png";
+
+</script>
+
+</body>
+</html>
