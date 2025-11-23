@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Training Presisi Tim DVNP</title>
+    <style>
+        /* --- SYSTEM RESET --- */
+        :root {
+            --op-blue: #5d6ecb;
+            --idx-dark: #12161c;
+            --idx-card: #1e2329;
+            --idx-green: #0ecb81;
+            --idx-red: #f6465d;
+        }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; user-select: none; }
+        body { margin: 0; background: #000; font-family: -apple-system, BlinkMacSystemFont, sans-serif; overflow: hidden; height: 100vh; }
+
+        /* --- SCREEN ENGINE --- */
+        .screen {
+            display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            flex-direction: column; overflow-y: auto; z-index: 10; padding-bottom: 100px;
+        }
+        .screen.active { display: flex; animation: fadeIn 0.2s; }
+        @keyframes fadeIn { from {opacity: 0;} to {opacity: 1;} }
+
+        /* --- GUIDE OVERLAY (PENUNTUN) --- */
+        .guide-box {
+            position: fixed; bottom: 0; left: 0; width: 100%;
+            background: rgba(255, 255, 0, 0.95); color: #000;
+            padding: 15px; text-align: center; font-weight: bold; font-size: 14px;
+            border-top: 3px solid #fbc02d; z-index: 999;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.5);
+        }
+
+        /* --- THEME: OPALP (PUTIH) --- */
+        .theme-op { background: #fff; color: #333; }
+        .op-header { padding: 15px; border-bottom: 1px solid #eee; font-weight: bold; display: flex; align-items: center; }
+        .op-input { width: 90%; margin: 10px auto; display: block; padding: 12px; border: 1px solid #ddd; border-radius: 8px; background: #f5f5f5; font-size: 14px;}
+        .op-btn { width: 90%; margin: 20px auto; padding: 14px; background: var(--op-blue); color: white; border: none; border-radius: 25px; font-weight: bold; font-size: 16px; }
+        
+        /* Modal Jebakan (PDF Hal 5) */
+        .modal-mask { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.6); display: flex; justify-content:center; align-items:center; z-index:50;}
+        .modal-body { background: white; width: 80%; padding: 20px; border-radius: 10px; text-align: center; }
+
+        /* --- THEME: INDODAX (GELAP) --- */
+        .theme-idx { background: var(--idx-dark); color: #fff; }
+        .idx-header { padding: 15px; background: var(--idx-card); display: flex; justify-content: space-between; align-items: center; font-size: 14px;}
+        .idx-card { background: var(--idx-card); margin: 10px; padding: 15px; border-radius: 8px; }
+        .idx-btn { width: 100%; padding: 12px; border-radius: 4px; border: none; font-weight: bold; color: white; margin-top: 10px; cursor: pointer; }
+        .bg-green { background: var(--idx-green); }
+        .bg-red { background: var(--idx-red); }
+        .bg-gray { background: #2b3139; }
+        .idx-input { width: 100%; background: #2b3139; border: 1px solid #474d57; color: white; padding: 10px; border-radius: 4px; margin-bottom: 10px; }
+
+        /* --- INTERACTIVE ZONES (PANAH MERAH) --- */
+        /* Kotak transparan yang harus diklik user, mirip area panah merah di PDF */
+        .click-zone {
+            border: 2px dashed red; /* Akan berkedip */
+            background: rgba(255, 0, 0, 0.1);
+            cursor: pointer;
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse { 0% {opacity:1;} 50% {opacity:0.5;} 100% {opacity:1;} }
+        
+        .hidden-trigger { position: absolute; width: 100%; height: 100%; top:0; left:0; opacity: 0; }
+
+    </style>
+</head>
+<body>
+
+    <div id="p-0" class="screen theme-op active" style="justify-content:center; text-align:center;">
+        <h1 style="color:var(--op-blue);">TRAINING MODE</h1>
+        <p>Ikuti setiap instruksi persis seperti PDF.</p>
+        <button class="op-btn" onclick="goto('p-1')">MULAI ➡</button>
+    </div>
+
+    <div id="p-1" class="screen theme-op">
+        <div class="op-header">Negara / Wilayah</div>
+        <div style="padding:10px;">
+            <div style="padding:15px; border-bottom:1px solid #eee;">HongKong (+852)</div>
+            <div style="padding:15px; border-bottom:1px solid #eee;">India (+91)</div>
+            <div onclick="goto('p-2')" class="click-zone" style="padding:15px; border-radius:5px;">
+                <b>Indonesia (+62)</b>
+            </div>
+            <div style="padding:15px;">Malaysia (+60)</div>
+        </div>
+        <div class="guide-box">PDF Hal 2: Klik 'Indonesia (+62)'</div>
+    </div>
+
+    <div id="p-2" class="screen theme-op">
+        <div class="op-header">Negara / Wilayah Anda</div>
+        <div style="padding:20px;">
+            <div style="background:#f9f9f9; padding:15px; display:flex; justify-content:space-between;">
+                <span>Indonesia</span><span>+62</span>
+            </div>
+        </div>
+        <button onclick="goto('p-3')" class="op-btn click-zone" style="margin-top:50px;">Berikutnya</button>
+        <div class="guide-box">PDF Hal 3: Klik tombol 'Berikutnya'</div>
+    </div>
+
+    <div id="p-3" class="screen theme-op">
+        <div class="op-header">Selamat datang di Opalp</div>
+        <div style="padding:20px;">
+            <input class="op-input" type="text" placeholder="Email" value="anggota@gmail.com" readonly>
+            <input class="op-input" type="password" placeholder="Password" value="********" readonly>
+            <input class="op-input" type="text" placeholder="Kode Rujukan" value="DVNP2025" readonly>
+            <button onclick="goto('p-4')" class="op-btn click-zone">Buat Akun</button>
+        </div>
+        <div class="guide-box">PDF Hal 4: Klik 'Buat Akun'</div>
+    </div>
+
+    <div id="p-4" class="screen theme-op">
+        <div class="op-header">Beranda</div>
+        <div class="modal-mask">
+            <div class="modal-body">
+                <h3>Berhasil Dibatasi</h3>
+                <p style="font-size:12px;">Anda telah menyelesaikan pendaftaran...</p>
+                <div style="display:flex; gap:10px; margin-top:20px;">
+                    <button onclick="goto('p-5')" class="click-zone" style="flex:1; padding:10px; background:white; border:1px solid #ccc;">Lewati</button>
+                    <button onclick="alert('⛔ SALAH! Lihat PDF Hal 5. Anda harus klik LEWATI.')" style="flex:1; padding:10px; background:var(--op-blue); color:white; border:none;">Bind Now</button>
+                </div>
+            </div>
+        </div>
+        <div class="guide-box">⚠ PDF Hal 5: KLIK TOMBOL 'Lewati'</div>
+    </div>
+
+    <div id="p-5" class="screen theme-op">
+        <div class="op-header">Topal <span style="margin-left:auto;">🎧</span></div>
+        <div style="margin:20px; padding:20px; background:#fff0f0; border:1px solid red; border-radius:10px;">
+            <h4 style="color:red; margin:0;">BUAT PASSWORD PENARIKAN</h4>
+            <br>
+            <button onclick="goto('p-6')" class="click-zone" style="background:red; color:white; border:none; padding:5px 15px; border-radius:10px;">Atur</button>
+        </div>
+        <div class="guide-box">PDF Hal 6: Klik tombol merah 'Atur'</div>
+    </div>
+
+    <div id="p-6" class="screen theme-op">
+        <div class="op-header">Sandi untuk dana</div>
+        <div style="padding:20px;">
+            <input class="op-input" type="password" placeholder="******" value="123456" readonly>
+            <input class="op-input" type="password" placeholder="******" value="123456" readonly>
+            <button onclick="goto('p-7')" class="op-btn click-zone">Konfirmasi</button>
+        </div>
+        <div class="guide-box">PDF Hal 7: Isi PIN & Klik Konfirmasi</div>
+    </div>
+
+    <div id="p-7" class="screen theme-op">
+        <div style="text-align:center; padding-top:50px;">
+            <h3>Selamat datang</h3>
+            <input class="op-input" value="anggota@gmail.com" readonly>
+            <button onclick="goto('p-8')" class="op-btn click-zone">Masuk / Login</button>
+        </div>
+        <div class="guide-box">PDF Hal 10: Klik Tombol Masuk/Login</div>
+    </div>
+
+    <div id="p-8" class="screen theme-op" style="justify-content:center; text-align:center;">
+        <h2 style="color:green;">✅ AKUN JADI</h2>
+        <p>Sekarang lanjut DEPOSIT di Indodax</p>
+        <button onclick="goto('idx-1')" class="op-btn" style="background:black;">BUKA INDODAX ➡</button>
+    </div>
+
+
+    <div id="idx-1" class="screen theme-idx">
+        <div class="idx-header"><span>INDODAX PRO</span><span>🔔</span></div>
+        <div class="idx-card">
+            <small>Total Aset</small><h2>0 IDR</h2>
+        </div>
+        <div style="display:grid; grid-template-columns:repeat(4,1fr); padding:10px;">
+            <div onclick="goto('idx-2')" class="click-zone" style="text-align:center; padding:5px;">
+                <div style="width:40px; height:40px; background:#2b3139; border-radius:50%; margin:auto; display:flex; align-items:center; justify-content:center;">⬇</div>
+                <small>Setor</small>
+            </div>
+            <div style="text-align:center; opacity:0.3;"><div style="width:40px; height:40px; background:#2b3139; border-radius:50%; margin:auto;"></div></div>
+            <div style="text-align:center; opacity:0.3;"><div style="width:40px; height:40px; background:#2b3139; border-radius:50%; margin:auto;"></div></div>
+        </div>
+        <div class="guide-box">PDF Hal 20: Klik Menu 'Setor'</div>
+    </div>
+
+    <div id="idx-2" class="screen theme-idx">
+        <div class="idx-header">Setor IDR</div>
+        <div style="padding:20px;">
+            <label style="font-size:12px; color:#aaa;">Jumlah Deposit</label>
+            <input class="idx-input" value="1.700.000" readonly>
+            <label style="font-size:12px; color:#aaa;">Bank</label>
+            <div style="padding:10px; background:#2b3139; border:1px solid #555; margin-bottom:20px;">Virtual Account (BCA)</div>
+            <button onclick="goto('idx-3')" class="idx-btn bg-green click-zone">Selanjutnya</button>
+        </div>
+        <div class="guide-box">PDF Hal 22: Klik 'Selanjutnya'</div>
+    </div>
+
+    <div id="idx-3" class="screen theme-idx">
+        <div class="idx-header">Pembayaran</div>
+        <div class="idx-card" style="text-align:center;">
+            <p>BCA Virtual Account</p>
+            <h2 style="color:#0ecb81">3353 7888 99</h2>
+            <p>1.700.049 IDR</p>
+        </div>
+        <div style="padding:20px;">
+            <button onclick="simulasiTransfer()" class="idx-btn bg-green click-zone">Saya Sudah Transfer</button>
+        </div>
+        <div class="guide-box">PDF Hal 24: Klik tombol konfirmasi</div>
+    </div>
+
+    <div id="idx-4" class="screen theme-idx">
+        <div class="idx-header">Market</div>
+        <div style="padding:10px;">
+            <div class="idx-input">🔍 Cari Koin...</div>
+            <div onclick="goto('idx-5')" class="click-zone idx-card" style="display:flex; justify-content:space-between; margin:0;">
+                <span>USDT/IDR</span>
+                <span style="color:#0ecb81">+0.23%</span>
+            </div>
+            <div class="idx-card" style="opacity:0.5;">ETH/IDR</div>
+            <div class="idx-card" style="opacity:0.5;">BTC/IDR</div>
+        </div>
+        <div class="guide-box">PDF Hal 36: Pilih 'USDT/IDR'</div>
+    </div>
+
+    <div id="idx-5" class="screen theme-idx">
+        <div class="idx-header">USDT/IDR</div>
+        <div style="padding:15px; display:grid; grid-template-columns:1.2fr 0.8fr; gap:10px;">
+            <div>
+                <div style="display:flex; margin-bottom:10px;">
+                    <div style="flex:1; background:#0ecb81; padding:8px; text-align:center; font-size:12px;">Beli</div>
+                    <div style="flex:1; background:#2b3139; padding:8px; text-align:center; font-size:12px; color:#aaa;">Jual</div>
+                </div>
+                
+                <div onclick="document.getElementById('dd-menu').style.display='block'" class="click-zone idx-input" style="font-size:12px; display:flex; justify-content:space-between;">
+                    <span id="txt-type">Limit Order</span> <span>▼</span>
+                </div>
+                <div id="dd-menu" style="display:none; background:#333; position:absolute; border:1px solid #555; padding:10px; z-index:20;">
+                    <div style="padding:5px;">Limit Order</div>
+                    <div onclick="pilihMarket()" style="padding:5px; background:#444; color:#0ecb81; font-weight:bold;">Market Order</div>
+                </div>
+
+                <div style="display:flex; gap:5px; margin:10px 0;">
+                    <div class="idx-input" style="margin:0; width:60%; font-size:10px;" id="txt-rp">Rp 0</div>
+                    <button onclick="isiSeratus()" class="click-zone" style="flex:1; background:#444; color:white; border:none; border-radius:4px; font-size:10px;">100%</button>
+                </div>
+
+                <button onclick="beliUSDT()" class="idx-btn bg-green click-zone">Beli USDT</button>
+            </div>
+
+            <div style="font-size:10px; text-align:right;">
+                <div style="color:#f6465d;">16.432</div>
+                <div style="color:#f6465d;">16.430</div>
+                <div style="color:#0ecb81; font-size:14px; margin:10px 0;">16.419</div>
+                <div style="color:#0ecb81;">16.419</div>
+                <div style="color:#0ecb81;">16.410</div>
+            </div>
+        </div>
+        <div id="msg-trade" class="guide-box">Langkah 1: Klik 'Limit Order' ganti ke 'Market Order'</div>
+    </div>
+
+    <div id="idx-6" class="screen theme-idx">
+        <div class="idx-header">Dompet</div>
+        <div class="idx-card">
+            <p>USDT</p>
+            <h2>103.30</h2>
+        </div>
+        <div style="padding:20px;">
+            <button onclick="goto('idx-7')" class="idx-btn bg-red click-zone">Tarik (Withdraw)</button>
+        </div>
+        <div class="guide-box">PDF Hal 44: Klik tombol merah 'Tarik'</div>
+    </div>
+
+    <div id="idx-7" class="screen theme-idx">
+        <div class="idx-header">Tarik USDT</div>
+        <div style="padding:20px;">
+            <p style="font-size:12px;">Pilih Jaringan Koin:</p>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                <div onclick="alert('❌ SALAH! Aset Hilang!')" style="border:1px solid #555; padding:15px; text-align:center; border-radius:8px;">BEP20</div>
+                <div onclick="pilihTRC()" class="click-zone" style="border:1px solid #555; padding:15px; text-align:center; border-radius:8px;">TRC20</div>
+                <div onclick="alert('❌ SALAH!')" style="border:1px solid #555; padding:15px; text-align:center; border-radius:8px;">ERC20</div>
+                <div style="border:1px solid #555; padding:15px; text-align:center; border-radius:8px;">Polygon</div>
+            </div>
+            <div id="form-wd" style="display:none; margin-top:20px;">
+                <input class="idx-input" value="Alamat: TCHutm2V..." readonly>
+                <input class="idx-input" value="Jml: 103.30" readonly>
+                <button onclick="goto('idx-8')" class="idx-btn bg-green click-zone">Selanjutnya</button>
+            </div>
+        </div>
+        <div class="guide-box">PDF Hal 46: WAJIB Klik Kotak 'TRC20'</div>
+    </div>
+
+    <div id="idx-8" class="screen theme-idx">
+        <div class="idx-header">Konfirmasi Penarikan</div>
+        <div class="idx-card">
+            <p>Jaringan: TRC20</p>
+            <p>Terima: 102.8 USDT</p>
+        </div>
+        <div style="padding:20px;">
+            <button onclick="goto('idx-9')" class="idx-btn bg-green click-zone">Tarik Koin</button>
+        </div>
+        <div class="guide-box">PDF Hal 50: Klik 'Tarik Koin'</div>
+    </div>
+
+    <div id="idx-9" class="screen theme-op" style="background:#eee;">
+        <div style="background:white; margin:20px; padding:20px; border-radius:10px;">
+            <h3 style="color:#0081d4;">Indodax</h3>
+            <p>Permintaan penarikan USDT.</p>
+            <div style="background:#f0f0f0; padding:15px; text-align:center; font-size:24px; letter-spacing:3px;">
+                <b>CFDDD9</b>
+            </div>
+            <button onclick="goto('idx-10')" class="op-btn click-zone">Salin Kode</button>
+        </div>
+        <div class="guide-box">PDF Hal 52: Salin Kode OTP</div>
+    </div>
+
+    <div id="idx-10" class="screen theme-idx">
+        <div class="idx-header">Verifikasi</div>
+        <div style="padding:20px;">
+            <p>Masukkan Kode:</p>
+            <input id="otp-field" class="idx-input" style="text-align:center; font-size:20px;" placeholder="Tempel Disini">
+            <div onclick="document.getElementById('otp-field').value='CFDDD9'" class="click-zone" style="height:50px; margin-top:-60px; position:relative;"></div>
+            
+            <button onclick="finish()" class="idx-btn bg-green click-zone" style="margin-top:20px;">Konfirmasi</button>
+        </div>
+        <div class="guide-box">Klik kotak input untuk Menempel Kode</div>
+    </div>
+
+    <div id="finish" class="screen theme-idx" style="justify-content:center; text-align:center;">
+        <h1 style="font-size:60px;">✅</h1>
+        <h2>BERHASIL!</h2>
+        <p>Dana sedang diproses.</p>
+        <button onclick="location.reload()" class="idx-btn bg-gray">Ulangi</button>
+    </div>
+
+    <script>
+        // ENGINE SEDERHANA
+        function goto(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+
+        function simulasiTransfer() {
+            let btn = document.querySelector('#idx-3 .idx-btn');
+            btn.innerHTML = "Mengecek...";
+            setTimeout(() => {
+                alert("Dana Rp 1.700.000 Masuk!");
+                goto('idx-4');
+            }, 1000);
+        }
+
+        // STATE TRADING
+        let stepTrade = 0; // 0=belum ganti market, 1=sudah market, 2=sudah 100%
+        function pilihMarket() {
+            document.getElementById('txt-type').innerText = "Market Order";
+            document.getElementById('dd-menu').style.display = "none";
+            document.getElementById('msg-trade').innerText = "Langkah 2: Klik tombol '100%'";
+            stepTrade = 1;
+        }
+        function isiSeratus() {
+            if(stepTrade < 1) { alert("Ikuti urutan! Ganti Limit ke Market Order dulu."); return; }
+            document.getElementById('txt-rp').innerText = "1.700.000";
+            document.getElementById('msg-trade').innerText = "Langkah 3: Klik 'Beli USDT'";
+            stepTrade = 2;
+        }
+        function beliUSDT() {
+            if(stepTrade < 2) { alert("Klik 100% dulu!"); return; }
+            goto('idx-6');
+        }
+
+        // STATE TRC20
+        function pilihTRC() {
+            document.getElementById('form-wd').style.display = 'block';
+            window.scrollTo(0, document.body.scrollHeight); // Scroll ke bawah
+        }
+
+        function finish() {
+            if(document.getElementById('otp-field').value !== 'CFDDD9') {
+                alert("Kode Kosong/Salah!"); return;
+            }
+            goto('finish');
+        }
+    </script>
+</body>
+</html>
